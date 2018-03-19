@@ -38,12 +38,21 @@ if (isset($_POST['add'])) {
     }
 }
 if (isset($_POST['get'])) {
-    /*
-    $dataassign = $conn->prepare('UPDATE `task` SET `assign`=:assign WHERE id = :id');
-    $dataassign->execute(array(
-        ':done' => $isassign,
-        ':id' => $_GET['done']
-    ));*/
+    $a = $_SESSION['id'];
+    $data = $conn->prepare("SELECT * FROM `task` left join `user` ON user.id=task.assigned_user_id where task.user_id = '$a'");
+    foreach($data as $rows) {
+        echo '<pre>';
+        print_r($rows);
+    }
+   // $isassign =
+    //$dataassign = $conn->prepare('UPDATE `task` SET `assign`=:assign WHERE id = :id');
+    //$dataassign->execute(array(
+    //    ':done' => $isassign,
+    //    ':id' => $_GET['done']
+   // ));
+}
+if (isset($_POST['exit'])) {
+    header('Location: go.php');
 }
 }
 catch(PDOException $e)
@@ -96,3 +105,7 @@ catch(PDOException $e)
     }
     ?>
 </table>
+
+<form method="post" action="" enctype="multipart/form-data">
+    <input type="submit" name="exit" value="Выйти"><br/><br/>
+</form>

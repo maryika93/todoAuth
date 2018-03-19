@@ -31,11 +31,11 @@ try {
             $result->bindParam(':log', $login);
             $result->bindParam(':pass', $password);
             $result->execute();
-            $data1 = $conn->query("SELECT `id` FROM `user` WHERE login = '$login'");
+            $data1 = $conn->query("SELECT * FROM `user` WHERE login = '$login'");
             foreach ($data1 as $rows) {
                 $_SESSION['id'] = $rows['id'];
+                $_SESSION['login'] = $rows['login'];
             }
-            echo $_SESSION['id'];
             echo "Вы успешно зарегистрированы! Теперь вы можете зайти на сайт.</br></br></br> <a href='index.php'>Главная страница</a>";
             die;
         }
