@@ -39,19 +39,31 @@ if (isset($_POST['add'])) {
         ));
     }
 
-if (isset($_POST['get'])) {
-    $a = $_POST['sel_name'];
-    $data = $conn->query("SELECT * FROM task left join user ON user.login='$a' where task.author= '$a'");
-    foreach($data as $rows) {
-        echo '<pre>';
-        print_r($rows);
-        $datadone = $conn->prepare('UPDATE `task` SET `assign`=:assign WHERE id = :id');
-        $datadone->execute(array(
-            ':assign' => $isdone,
-            ':id' => $_GET['done']
-        ));
+  for($i=0; $i<100; $i++) {
+        if (isset($_POST[$i])) {
+            echo $i;
+            $users_id  = [];
+            $users_log = [];
+            $datauser  = $conn->query("SELECT * FROM `user`");
+            foreach ($datauser as $rows) {
+                $users_id[]  = $rows['id'];
+                $users_log[] = $rows['login'];
+            }
+            for ($i = 0; $i < count($users_log); $i++) {
+                if ($_POST['sel_name'] === $users_log[$i]) {
+                    $assign = $users_id[$i];
+                }
+            }
+                $datadone = $conn->prepare('UPDATE `task` SET `assign`=:assign, `assigned_user_id`=:asusid WHERE id = :id');
+                $datadone->execute(array(
+                    ':assign' => $_POST['sel_name'],
+                    ':asusid' => $assign,
+                    ':id' => $i
+                ));
+            break;
+
+        }
     }
-}
 
 
 if (isset($_POST['exit'])) {
@@ -85,6 +97,7 @@ catch(PDOException $e)
     $a = $_SESSION['id'];
     $data = $conn->query("SELECT * FROM `task` left join `user` ON user.id=task.assigned_user_id where task.user_id = '$a'");
     foreach($data as $rows) {
+        $q = $rows['0'];
         ?>
             <tr>
                 <td align="center"><?php echo $rows['description'] ?></td>
@@ -103,7 +116,7 @@ catch(PDOException $e)
                             echo "<option value = '$a' > $a </option>";
                         }
                         echo "</select>"; ?>
-                        <input type="submit" name="get" value="Переложить ответственность">
+                        <input type="submit" name="<?php echo $q ?>" value="Переложить ответственность">
                     </form>
             </tr>
         <?php
@@ -114,3 +127,5 @@ catch(PDOException $e)
 <form method="post" action="" enctype="multipart/form-data">
     <input type="submit" name="exit" value="Выйти"><br/><br/>
 </form>
+
+<?php //'get'.$rows['0']?>
