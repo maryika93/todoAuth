@@ -21,36 +21,39 @@ if (isset($_POST['add'])) {
         $isdone    = "В процессе";
         $data->execute();
     }
-    if (isset($_GET['delete'])) {
-        $del     = $_GET['delete'];
+}
+    if(isset($_GET['delete'])){
+        $del = $_GET['delete'];
+        echo $del;
         $datadel = $conn->prepare('DELETE FROM `task` WHERE id = :id');
         $datadel->bindParam(':id', $del);
         $datadel->execute();
     }
 
-    if (isset($_GET['done'])) {
-        $isdone   = "Выполнено";
+    if(isset($_GET['done'])){
+        $isdone = "Выполнено";
         $datadone = $conn->prepare('UPDATE `task` SET `is_done`=:done WHERE id = :id');
         $datadone->execute(array(
             ':done' => $isdone,
             ':id' => $_GET['done']
         ));
     }
-}
+
 if (isset($_POST['get'])) {
-    $a = $_SESSION['id'];
-    $data = $conn->prepare("SELECT * FROM `task` left join `user` ON user.id=task.assigned_user_id where task.user_id = '$a'");
+    $a = $_POST['sel_name'];
+    $data = $conn->query("SELECT * FROM task left join user ON user.login='$a' where task.author= '$a'");
     foreach($data as $rows) {
         echo '<pre>';
         print_r($rows);
+        $datadone = $conn->prepare('UPDATE `task` SET `assign`=:assign WHERE id = :id');
+        $datadone->execute(array(
+            ':assign' => $isdone,
+            ':id' => $_GET['done']
+        ));
     }
-   // $isassign =
-    //$dataassign = $conn->prepare('UPDATE `task` SET `assign`=:assign WHERE id = :id');
-    //$dataassign->execute(array(
-    //    ':done' => $isassign,
-    //    ':id' => $_GET['done']
-   // ));
 }
+
+
 if (isset($_POST['exit'])) {
     header('Location: go.php');
 }
@@ -79,14 +82,15 @@ catch(PDOException $e)
     </tr>
 
     <?php
-    $data = $conn->query('SELECT * FROM task');
+    $a = $_SESSION['id'];
+    $data = $conn->query("SELECT * FROM `task` left join `user` ON user.id=task.assigned_user_id where task.user_id = '$a'");
     foreach($data as $rows) {
         ?>
             <tr>
                 <td align="center"><?php echo $rows['description'] ?></td>
                 <td align="center"><?php echo $rows['date_added'] ?></td>
                 <td align="center"><?php echo $rows['is_done'] ?></td>
-                <td align="center"><?php echo '<a href="index.php?delete=' . $rows['id'] . '">Удалить</a> <br/>'.'<a href="index.php?done=' . $rows['id'] . '">Выполнить</a>'?></td>
+                <td align="center"><?php echo '<a href="index.php?delete=' . $rows['0'] . '">Удалить</a> <br/>'.'<a href="index.php?done=' . $rows['0'] . '">Выполнить</a>'?></td>
                 <td align="center"><?php echo $rows['assign'] ?></td>
                 <td align="center"><?php echo $rows['author'] ?></td>
                 <td align="center">
@@ -95,6 +99,7 @@ catch(PDOException $e)
                         $data1 = $conn->query('SELECT * FROM `user`');
                         foreach($data1 as $rows1) {
                             $a = $rows1['login'];
+                            $b = $rows1['id'];
                             echo "<option value = '$a' > $a </option>";
                         }
                         echo "</select>"; ?>
@@ -102,7 +107,7 @@ catch(PDOException $e)
                     </form>
             </tr>
         <?php
-    }
+   }
     ?>
 </table>
 
